@@ -5,6 +5,47 @@ import { productsAPI } from '../services/api';
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Hero slide images
+  const heroSlides = [
+    {
+      image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1920&h=1080&fit=crop",
+      title: "ស្វែងរកសម្លៀកបំពាក់ទំនើប",
+      subtitle: "គុណភាពខ្ពស់ តម្លៃសមរម្យ ដឹកជញ្ជូនទៅដល់ផ្ទះ"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1920&h=1080&fit=crop",
+      title: "សម្លៀកបំពាក់ស្តង់ដារ",
+      subtitle: "ម៉ូដថ្មីៗប្រចាំថ្ងៃ តាមពេលវេលាបច្ចុប្បន្ន"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1920&h=1080&fit=crop",
+      title: "តម្លៃពិសេសពិសេស",
+      subtitle: "បញ្ចុះតម្លៃរហ័ស សម្រាប់អតិថិជនពិសេស"
+    }
+  ];
+
+  // Auto-advance slides
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000); // Change slide every 5 seconds
+
+    return () => clearInterval(timer);
+  }, [heroSlides.length]);
+
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  };
 
   useEffect(() => {
     fetchFeaturedProducts();
@@ -23,33 +64,92 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 khmer-text animate-fade-in">
-              ស្វែងរកសម្លៀកបំពាក់ទំនើប
-            </h1>
-            <p className="text-xl md:text-3xl mb-8 khmer-text text-blue-100 max-w-3xl mx-auto">
-              គុណភាពខ្ពស់ តម្លៃសមរម្យ ដឹកជញ្ជូនទៅដល់ផ្ទះ
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/products"
-                className="bg-white text-indigo-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transform hover:scale-105 transition-all duration-200 shadow-xl khmer-text"
-              >
-                មើលផលិតផល
-              </Link>
-              <Link
-                to="/register"
-                className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-indigo-600 transform hover:scale-105 transition-all duration-200 khmer-text"
-              >
-                ចុះឈ្មោះឥឡូវនេះ
-              </Link>
+      {/* Hero Section with Image Slider */}
+      <section className="relative h-screen overflow-hidden">
+        {/* Image Slider */}
+        <div className="relative h-full">
+          {heroSlides.map((slide, index) => (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                index === currentSlide ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <img
+                src={slide.image}
+                alt={slide.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60"></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Content Overlay */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center text-white px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 khmer-text animate-fade-in transform transition-all duration-1000">
+                {heroSlides[currentSlide].title}
+              </h1>
+              <p className="text-lg md:text-xl lg:text-2xl mb-8 khmer-text text-blue-100 max-w-3xl mx-auto transform transition-all duration-1000 delay-300">
+                {heroSlides[currentSlide].subtitle}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center transform transition-all duration-1000 delay-500">
+                <Link
+                  to="/products"
+                  className="bg-white text-indigo-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transform hover:scale-105 transition-all duration-200 shadow-xl khmer-text"
+                >
+                  មើលផលិតផល
+                </Link>
+                <Link
+                  to="/register"
+                  className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-indigo-600 transform hover:scale-105 transition-all duration-200 khmer-text"
+                >
+                  ចុះឈ្មោះឥឡូវនេះ
+                </Link>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Slider Controls */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-200 z-10"
+          aria-label="Previous slide"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-200 z-10"
+          aria-label="Next slide"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        {/* Slide Indicators */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+          {heroSlides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === currentSlide
+                  ? 'bg-white w-8'
+                  : 'bg-white/50 hover:bg-white/70'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Bottom Wave */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg className="w-full h-16 text-gray-50" fill="currentColor" viewBox="0 0 1440 100">
             <path d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,42.7C672,32,768,32,864,42.7C960,53,1056,75,1152,80C1248,85,1344,75,1392,69.3L1440,64L1440,100L1392,100C1344,100,1248,100,1152,100C1056,100,960,100,864,100C768,100,672,100,576,100C480,100,384,100,288,100C192,100,96,100,48,100L0,100Z"></path>
