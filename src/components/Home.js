@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { productsAPI } from '../services/api';
+import { useCart } from '../contexts/CartContext';
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [successMessage, setSuccessMessage] = useState('');
+  const { addToCart } = useCart();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Hero slide images
@@ -62,8 +65,33 @@ const Home = () => {
     }
   };
 
+  const handleAddToCart = (product) => {
+    try {
+      addToCart(product);
+      const productName = typeof product.name === 'string' ? product.name : 'ផលិតផល';
+      setSuccessMessage(`បានបញ្ចូល "${productName}" ក្នុងរទេះ!`);
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      setSuccessMessage('មានបញ្ហាក្នុងការបញ្ចូលក្នុងរទេះ');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    }
+  };
+
   return (
     <div className="min-h-screen">
+      {/* Success Message */}
+      {successMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 animate-pulse">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            {successMessage}
+          </div>
+        </div>
+      )}
+      
       {/* Hero Section with Image Slider */}
       <section className="relative h-screen overflow-hidden">
         {/* Image Slider */}
@@ -229,47 +257,100 @@ const Home = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {[...Array(6)].map((_, index) => (
                 <div key={index} className="animate-pulse">
-                  <div className="bg-gray-300 h-64 rounded-xl mb-4"></div>
+                  <div className="bg-gray-300 h-56 rounded-2xl mb-4"></div>
                   <div className="h-4 bg-gray-300 rounded mb-2"></div>
                   <div className="h-4 bg-gray-300 rounded w-3/4"></div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {featuredProducts.map((product) => (
-                <div key={product.id} className="group bg-white rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden">
+                <div key={product.id} className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden">
                   {product.image_url ? (
                     <div className="relative overflow-hidden">
                       <img
                         src={`http://localhost:8000${product.image_url.startsWith('/') ? '' : '/'}${product.image_url}`}
                         alt={product.name}
-                        className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
+                        className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-300"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      {product.stock_quantity === 0 && (
+                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                          <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold khmer-text">
+                            អស់ស្តុក
+                          </span>
+                        </div>
+                      )}
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <Link
+                          to={`/products/${product.id}`}
+                          className="bg-white text-indigo-600 p-2 rounded-full shadow-lg hover:bg-indigo-50 transition-colors duration-200"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </Link>
+                      </div>
                     </div>
                   ) : (
-                    <div className="w-full h-64 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                    <div className="w-full h-56 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
                       <span className="text-gray-500 text-4xl">👕</span>
                     </div>
                   )}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 khmer-text group-hover:text-indigo-600 transition-colors duration-200">
+                  <div className="p-5">
+                    <div className="mb-3">
+                      <span className="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full khmer-text">
+                        {product.category || 'ទូទៅ'}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 khmer-text group-hover:text-indigo-600 transition-colors duration-200 line-clamp-2">
                       {product.name}
                     </h3>
                     <p className="text-2xl font-bold text-indigo-600 mb-3">${product.price}</p>
-                    <p className="text-gray-600 mb-4 khmer-text line-clamp-2">
+                    <p className="text-gray-600 mb-4 khmer-text line-clamp-2 text-sm">
                       {product.description || 'ផលិតផលគុណភាពខ្ពស់សម្រាប់អ្នក'}
                     </p>
-                    <Link
-                      to={`/products/${product.id}`}
-                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg text-center font-semibold hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg khmer-text inline-block"
-                    >
-                      មើលលម្អិត
-                    </Link>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className={`text-sm font-medium khmer-text ${
+                        product.stock_quantity > 10 ? 'text-green-600' : 
+                        product.stock_quantity > 0 ? 'text-yellow-600' : 'text-red-600'
+                      }`}>
+                        ស្តុក: {product.stock_quantity}
+                      </span>
+                      <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => (
+                          <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                          </svg>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleAddToCart(product)}
+                        className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all duration-200 khmer-text ${
+                          product.stock_quantity === 0 
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 shadow-lg'
+                        }`}
+                        disabled={product.stock_quantity === 0}
+                      >
+                        {product.stock_quantity === 0 ? 'អស់ស្តុក' : 'បញ្ចូលក្នុងរទេះ'}
+                      </button>
+                      <Link
+                        to={`/products/${product.id}`}
+                        className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))}
