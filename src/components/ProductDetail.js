@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useCart } from '../contexts/CartContext';
 import { productsAPI } from '../services/api';
+import { useCart } from '../contexts/CartContext';
+import { getImageUrl } from '../utils/helpers';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -61,7 +62,7 @@ const ProductDetail = () => {
               <div className="md:w-1/2">
                 {product.image_url ? (
                   <img
-                    src={`http://localhost:8000${product.image_url.startsWith('/') ? '' : '/'}${product.image_url}`}
+                    src={getImageUrl(product.image_url)}
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />

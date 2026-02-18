@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import { getImageUrl } from '../utils/helpers';
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, getCartTotal } = useCart();
@@ -57,7 +58,7 @@ const Cart = () => {
                           <div className="flex items-center">
                             {item.image_url ? (
                               <img
-                                src={`http://localhost:8000${item.image_url.startsWith('/') ? '' : '/'}${item.image_url}`}
+                                src={getImageUrl(item.image_url)}
                                 alt={item.name}
                                 className="h-12 w-12 rounded-lg object-cover mr-4"
                               />

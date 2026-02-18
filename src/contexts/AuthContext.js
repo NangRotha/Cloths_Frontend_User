@@ -1,5 +1,6 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../services/api';
+import { getApiUrl } from '../utils/helpers';
 
 const AuthContext = createContext();
 
@@ -112,15 +113,16 @@ export const AuthProvider = ({ children }) => {
 
   const googleLogin = () => {
     // Check if Google OAuth is available by testing the endpoint first
-    fetch('http://localhost:8000/api/auth/google')
+    const apiUrl = getApiUrl();
+    fetch(`${apiUrl}/api/auth/google`)
       .then(response => {
         if (!response.ok) {
           // If not configured, redirect to setup instructions
-          window.location.href = 'http://localhost:8000/api/auth/google';
+          window.location.href = `${apiUrl}/api/auth/google`;
           return;
         }
         // If the endpoint is working, redirect to Google OAuth
-        window.location.href = 'http://localhost:8000/api/auth/google';
+        window.location.href = `${apiUrl}/api/auth/google`;
       })
       .catch(error => {
         console.error('Google OAuth not available:', error);

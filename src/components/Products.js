@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { productsAPI } from '../services/api';
+import { getImageUrl } from '../utils/helpers';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -209,7 +210,7 @@ const Products = () => {
                 {product.image_url ? (
                   <div className="relative overflow-hidden">
                     <img
-                      src={`http://localhost:8000${product.image_url.startsWith('/') ? '' : '/'}${product.image_url}`}
+                      src={getImageUrl(product.image_url)}
                       alt={product.name}
                       className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-300"
                     />
